@@ -31,9 +31,12 @@ public:
     bn::sprite_ptr sprite;
     bn::fixed x_speed;
     bn::fixed y_speed;
+    bn::random rng_x_speed = bn::random();
+    bn::random rng_y_speed = bn::random();
 
     Bouncer(bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)),
-                                                    x_speed(BASE_SPEED), y_speed(BASE_SPEED)
+                                                    x_speed(rng_x_speed.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED + 1)),
+                                                    y_speed(rng_y_speed.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED + 1))
     {
     }
 
@@ -61,17 +64,22 @@ public:
             x = MIN_X;
             x_speed *= -1;
         }
-        if (y < MIN_Y) {
+        if (y < MIN_Y)
+        {
             y = MIN_Y;
             y_speed *= -1;
         }
-        if (y > MAX_Y) {
+        if (y > MAX_Y)
+        {
             y = MAX_Y;
             y_speed *= -1;
         }
 
         sprite.set_x(x);
         sprite.set_y(y);
+
+        //rng_x_speed.update();
+        //rng_y_speed.update();
     }
 };
 
@@ -109,17 +117,13 @@ int main()
 {
     bn::core::init();
 
-    // Sprites and x speeds of bouncers
-    // Items with the same index correspond to each other
-    // bn::vector<bn::sprite_ptr, MAX_BOUNCERS> sprites = {};
-    // bn::vector<bn::fixed, MAX_BOUNCERS> x_speeds = {};
-
     bn::vector<Bouncer, MAX_BOUNCERS> bouncers = {};
 
     while (true)
     {
         // if b is pressed, print average x positions of bouncers
-        if (bn::keypad::b_pressed()) {
+        if (bn::keypad::b_pressed())
+        {
             BN_LOG(average_x(bouncers));
         }
 
@@ -140,6 +144,7 @@ int main()
         {
             b.update();
         }
+
 
         bn::core::update();
     }
