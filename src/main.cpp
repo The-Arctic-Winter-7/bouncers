@@ -63,22 +63,22 @@ public:
     }
 };
 
-bn::fixed average_x(bn::vector<bn::sprite_ptr, MAX_BOUNCERS> &sprites)
+bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // Add all x positions together
     bn::fixed x_sum = 0;
-    for (bn::sprite_ptr sprite : sprites)
+    for (Bouncer bouncer : bouncers)
     {
-        x_sum += sprite.x();
+        x_sum += bouncer.sprite.x();
     }
 
     bn::fixed x_average = x_sum;
 
     // Only divide if we have 1 or more
     // Prevents division by 0
-    if (sprites.size() > 0)
+    if (bouncers.size() > 0)
     {
-        x_average /= sprites.size();
+        x_average /= bouncers.size();
     }
 
     return x_average;
@@ -112,6 +112,11 @@ int main()
 
     while (true)
     {
+        // if b is pressed, print average x positions of bouncers
+        if (bn::keypad::b_pressed()) {
+            BN_LOG(average_x(bouncers));
+        }
+
         // if A is pressed add a new bouncer
         if (bn::keypad::a_pressed())
         {
