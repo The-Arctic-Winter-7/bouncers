@@ -246,7 +246,7 @@ void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers,
 void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // This is the radius of a bouncer sprite
-    bn::fixed r = 8;
+    bn::fixed r = 4;
 
     // i represents x and j represents y; radius is the same for colliding pairs
     // Use distance formula: (x2 - x1)^2 + (y2 - y1)^2 <= (2r)^2
@@ -266,7 +266,7 @@ void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
             bn::fixed x_dist = ((x1 * x1) - (2 * x1 * x2) + (x2 * x2));
             bn::fixed y_dist = ((y1 * y1) - (2 * y1 * y2) + (y2 * y2));
             // This is meant to be the two radii of each object, but all bouncers are the same size
-            bn::fixed r_dist = 2 * (r * r);
+            bn::fixed r_dist = (2 * r) * (2 * r);
 
             // Uses distance formula to check if a pair of bouncers intersect with each other
             if (x_dist + y_dist <= r_dist)
