@@ -266,7 +266,7 @@ void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
             bn::fixed x_dist = ((x1 * x1) - (2 * x1 * x2) + (x2 * x2));
             bn::fixed y_dist = ((y1 * y1) - (2 * y1 * y2) + (y2 * y2));
             // This is meant to be the two radii of each object, but all bouncers are the same size
-            bn::fixed r_dist = (2 * r) * (2 * r);
+            bn::fixed r_dist = 2 * (r * r);
 
             // Uses distance formula to check if a pair of bouncers intersect with each other
             if (x_dist + y_dist <= r_dist)
