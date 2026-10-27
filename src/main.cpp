@@ -27,16 +27,25 @@ static constexpr int MAX_ALT_BOUNCERS = 1;
 
 bn::random rng = bn::random();
 
+/**
+ * Generates random numbers for Bouncer sprite speeds
+ * 
+ * @return A Butano Fixed value, speed. Internal seed is updated every generation.
+ */
 bn::fixed rng_speed()
 {
     bn::fixed speed = rng.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED);
 
-    while (speed >= -1 && speed <= 1)
-        ;
+    while (speed >= -1 && speed <= 1);
 
     return speed;
 }
 
+/**
+ * Bouncer class that creates bouncer sprites that, on collision with the screen boundaries, reverses
+ * positions. If on collision with each other, bouncers exchange momentum. The collision logic between
+ * two bouncers is handled by check_collision(bn::vector<Bouncer, MAX_BOUNCERS>).
+ */
 class Bouncer
 {
 private:
@@ -45,12 +54,23 @@ public:
     bn::fixed x_speed;
     bn::fixed y_speed;
 
+    /**
+     *  Bouncer constructor that creates sprites at the given coordinates and with randomized speeds. Extends the
+     * Butano sprite pointer class bn::sprite_ptr.
+     *
+     *  @param start_x The starting x coordinate the bouncer spawns at
+     *  @param start_y The starting y coordinate the bouncer spawns at
+     */
     Bouncer(bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::bouncer.create_sprite(x_start, y_start)),
                                                     x_speed(rng_speed()),
                                                     y_speed(rng_speed())
     {
     }
 
+     /**
+     *  Updates the position of the Bouncer sprite by checking whether or not it's position is greater
+     * than the bounds of the screen.
+     */
     void update()
     {
 
@@ -96,6 +116,11 @@ public:
 };
 
 // Both functions that calculate averages must be set before the BouncerAlt class
+/**
+ * Calculates the average x position of all current Bouncer sprites.
+ * 
+ * @param bouncers Reference to a vector of Bouncer objects
+ */
 bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // Add all x positions together
@@ -119,6 +144,11 @@ bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
     return x_average;
 }
 
+/**
+ * Calculates the average y position of all current Bouncer sprites.
+ * 
+ * @param bouncers Reference to a vector of Bouncer objects
+ */
 bn::fixed average_y(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // Add all y positions together
@@ -141,18 +171,32 @@ bn::fixed average_y(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 
     return y_average;
 }
-
-// Alternative bouncer that remains at the average position of all other bouncers
+/**
+ *  Alternative bouncer that remains at the average position of all other bouncers
+ *
+ */
 class BouncerAlt
 {
 private:
 public:
     bn::sprite_ptr sprite;
 
+    /**
+     *  BouncerAlt constructor that only creates sprites at the given coordinates. Extends the
+     * Butano sprite pointer class bn::sprite_ptr
+     *
+     *  @param start_x The starting x coordinate the bouncer spawns at
+     *  @param start_y The starting y coordinate the bouncer spawns at
+     */
     BouncerAlt(bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::bouncer.create_sprite(x_start, y_start))
     {
     }
 
+    /**
+     *  Updates the position of the BouncerAlt sprite
+     * 
+     * @param bouncers Reference to a vector of Bouncer objects 
+     */
     void update(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
     {
         // No speed needed
@@ -162,6 +206,13 @@ public:
     }
 };
 
+/**
+ *  Adds a bouncer to the game by pushing a Bouncer object into a vector of Bouncer objects.
+ *
+ *  @param bouncers Reference to a vector of Bouncer objects
+ *  @param start_x The starting x coordinate the bouncer spawns at
+ *  @param start_y The starting y coordinate the bouncer spawns at
+ */
 void add_bouncer(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers, bn::fixed start_x, bn::fixed start_y)
 {
     // Only add if we're below the maximum
@@ -171,6 +222,15 @@ void add_bouncer(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers, bn::fixed start_x,
     }
 }
 
+/**
+ *  Adds a special bouncer to the game by pushing a Bouncer object into a vector of Bouncer objects.
+ * This bouncer has no collision logic and determines its current position depending on the average
+ * x and y coordinates of every bouncer currently rendered on screen.
+ *
+ *  @param bouncers Reference to a vector of BouncerAlt objects
+ *  @param start_x The starting x coordinate the bouncer spawns at
+ *  @param start_y The starting y coordinate the bouncer spawns at
+ */
 void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers,
                      bn::fixed start_x, bn::fixed start_y)
 {
@@ -178,6 +238,11 @@ void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers,
     alt_bouncers.push_back(BouncerAlt(start_x, start_y));
 }
 
+/**
+ *  Checks for the collision of two bouncers using the distance formula.
+ *
+ *  @param bouncers Reference to a vector of Bouncer objects
+ */
 void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // This is the radius of a bouncer sprite
