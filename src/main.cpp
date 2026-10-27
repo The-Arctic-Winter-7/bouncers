@@ -75,13 +75,17 @@ public:
             x = MIN_X;
             x_speed *= -1;
         }
+        // If we've gone off the screen on the top
         if (y < MIN_Y)
         {
+            // Snap back to screen and reverse direction
             y = MIN_Y;
             y_speed *= -1;
         }
+        // If we've gone off the screen on the bottom
         if (y > MAX_Y)
         {
+            // Snap back to screen and reverse direction
             y = MAX_Y;
             y_speed *= -1;
         }
@@ -91,12 +95,15 @@ public:
     }
 };
 
+// Both functions that calculate averages must be set before the BouncerAlt class
 bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
     // Add all x positions together
     bn::fixed x_sum = 0;
+    // Iterates through all current bouncers
     for (Bouncer bouncer : bouncers)
     {
+        // and adds each x position into a single variable
         x_sum += bouncer.sprite.x();
     }
 
@@ -114,10 +121,12 @@ bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 
 bn::fixed average_y(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 {
-    // Add all x positions together
+    // Add all y positions together
     bn::fixed y_sum = 0;
+    // Iterates through all current bouncers
     for (Bouncer bouncer : bouncers)
     {
+        // and adds each y position into a single variable
         y_sum += bouncer.sprite.y();
     }
 
@@ -133,24 +142,23 @@ bn::fixed average_y(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
     return y_average;
 }
 
+// Alternative bouncer that remains at the average position of all other bouncers
 class BouncerAlt
 {
 private:
 public:
     bn::sprite_ptr sprite;
-    bn::fixed x_pos;
-    bn::fixed y_pos;
 
-    BouncerAlt(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers, bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::bouncer.create_sprite(x_start, y_start)),
-                                                                                                   x_pos(average_x(bouncers)),
-                                                                                                   y_pos(average_y(bouncers))
+    BouncerAlt(bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::bouncer.create_sprite(x_start, y_start))
     {
     }
 
-    void update()
+    void update(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
     {
-        sprite.set_x(x_pos);
-        sprite.set_y(y_pos);
+        // No speed needed
+        // Only updates to the average position of all bouncers
+        sprite.set_x(average_x(bouncers));
+        sprite.set_y(average_y(bouncers));
     }
 };
 
@@ -163,13 +171,11 @@ void add_bouncer(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers, bn::fixed start_x,
     }
 }
 
-void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers, bn::vector<Bouncer, MAX_BOUNCERS> bouncers,
+void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers,
                      bn::fixed start_x, bn::fixed start_y)
 {
-    if (alt_bouncers.size() < alt_bouncers.max_size())
-    {
-        alt_bouncers.push_back(BouncerAlt(bouncers, start_x, start_y));
-    }
+    // Only one alternative bouncer is created, so there is no need to check if there are more than zero
+    alt_bouncers.push_back(BouncerAlt(start_x, start_y));
 }
 
 int main()
@@ -184,8 +190,7 @@ int main()
         // if b is pressed, print average x positions of bouncers
         if (bn::keypad::b_pressed() && bouncers.size() > 0)
         {
-            BN_LOG(average_x(bouncers));
-            add_alt_bouncer(alt_bouncers, bouncers, 0, 0);
+            add_alt_bouncer(alt_bouncers, 0, 0);
         }
 
         // if A is pressed add a new bouncer
@@ -194,13 +199,6 @@ int main()
             add_bouncer(bouncers, 0, 0);
         }
 
-        // if B is pressed print the average to the console
-        /* if (bn::keypad::b_pressed())
-         {
-             bn::fixed x_average = average_x(sprites);
-             BN_LOG("Average x: ", x_average);
-       */
-
         for (Bouncer &b : bouncers)
         {
             b.update();
@@ -208,7 +206,7 @@ int main()
 
         for (BouncerAlt &alt : alt_bouncers)
         {
-            alt.update();
+            alt.update(bouncers);
         }
 
         bn::core::update();
