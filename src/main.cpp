@@ -24,6 +24,9 @@ static constexpr bn::fixed BASE_SPEED = 2;
 // Maximum number of bouncers on screen at once
 static constexpr int MAX_BOUNCERS = 20;
 
+bn::random rng = bn::random();
+
+
 class Bouncer
 {
 private:
@@ -31,12 +34,10 @@ public:
     bn::sprite_ptr sprite;
     bn::fixed x_speed;
     bn::fixed y_speed;
-    bn::random rng_x_speed = bn::random();
-    bn::random rng_y_speed = bn::random();
 
     Bouncer(bn::fixed x_start, bn::fixed y_start) : sprite(bn::sprite_items::dot.create_sprite(x_start, y_start)),
-                                                    x_speed(rng_x_speed.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED + 1)),
-                                                    y_speed(rng_y_speed.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED + 1))
+                                                    x_speed(rng.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED)),
+                                                    y_speed(rng.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED))
     {
     }
 
@@ -77,9 +78,6 @@ public:
 
         sprite.set_x(x);
         sprite.set_y(y);
-
-        //rng_x_speed.update();
-        //rng_y_speed.update();
     }
 };
 
