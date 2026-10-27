@@ -178,6 +178,46 @@ void add_alt_bouncer(bn::vector<BouncerAlt, MAX_ALT_BOUNCERS> &alt_bouncers,
     alt_bouncers.push_back(BouncerAlt(start_x, start_y));
 }
 
+void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
+{
+    // This is the radius of a bouncer sprite
+    bn::fixed r = 8;
+
+    // i represents x and j represents y; radius is the same for colliding pairs
+    // Use distance formula: (x2 - x1)^2 + (y2 - y1)^2 <= (2r)^2
+    for (int i = 0; i < bouncers.size(); i++)
+    {
+        // Nested for loop checks every possible pair every frame
+        for (int j = i + 1; j < bouncers.size(); j++)
+        {
+            // These variables represent the x and y coordiates of two bouncers
+            bn::fixed x1 = bouncers[i].sprite.x();
+            bn::fixed x2 = bouncers[j].sprite.x();
+            bn::fixed y1 = bouncers[i].sprite.y();
+            bn::fixed y2 = bouncers[j].sprite.y();
+
+            // Butano has no math function for powers so a workaroud is needed
+            // These are expanded polynomials for each x and y binomial pairing
+            bn::fixed x_dist = ((x1 * x1) - (2 * x1 * x2) + (x2 * x2));
+            bn::fixed y_dist = ((y1 * y1) - (2 * y1 * y2) + (y2 * y2));
+            // This is meant to be the two radii of each object, but all bouncers are the same size
+            bn::fixed r_dist = (2 * r) * (2 * r);
+
+            // Uses distance formula to check if a pair of bouncers intersect with each other
+            if (x_dist + y_dist <= r_dist)
+            {
+                // Bouncers exchange x and y speeds
+                bn::fixed tempx = bouncers[i].x_speed; // temp storage for swap
+                bn::fixed tempy = bouncers[i].y_speed; // temp storage for swap
+                bouncers[i].x_speed = bouncers[j].x_speed;
+                bouncers[i].y_speed = bouncers[j].y_speed;
+                bouncers[j].x_speed = tempx;
+                bouncers[j].y_speed = tempy;
+            }
+        }
+    }
+}
+
 int main()
 {
     bn::core::init();
@@ -198,6 +238,8 @@ int main()
         {
             add_bouncer(bouncers, 0, 0);
         }
+
+        check_collision(bouncers);
 
         for (Bouncer &b : bouncers)
         {
