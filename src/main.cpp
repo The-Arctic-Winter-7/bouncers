@@ -5,9 +5,11 @@
 #include <bn_display.h>
 #include <bn_random.h>
 #include <bn_vector.h>
+#include <bn_audio.h>
 #include <bn_log.h>
 
 #include "bn_sprite_items_bouncer.h"
+#include "bn_sound_items.h"
 
 // Set max/min x position to be the edges of the display
 static constexpr int HALF_SCREEN_WIDTH = bn::display::width() / 2;
@@ -29,14 +31,15 @@ bn::random rng = bn::random();
 
 /**
  * Generates random numbers for Bouncer sprite speeds
- * 
+ *
  * @return A Butano Fixed value, speed. Internal seed is updated every generation.
  */
 bn::fixed rng_speed()
 {
     bn::fixed speed = rng.get_unbiased_fixed(-BASE_SPEED, BASE_SPEED);
 
-    while (speed >= -1 && speed <= 1);
+    while (speed >= -1 && speed <= 1)
+        ;
 
     return speed;
 }
@@ -67,7 +70,7 @@ public:
     {
     }
 
-     /**
+    /**
      *  Updates the position of the Bouncer sprite by checking whether or not it's position is greater
      * than the bounds of the screen.
      */
@@ -87,6 +90,7 @@ public:
             // Snap back to screen and reverse direction
             x = MAX_X;
             x_speed *= -1;
+            bn::sound_items::wall_impact.play(0.5, 1, 1);
         }
         // If we've gone off the screen on the left
         if (x < MIN_X)
@@ -94,6 +98,7 @@ public:
             // Snap back to screen and reverse direction
             x = MIN_X;
             x_speed *= -1;
+            bn::sound_items::wall_impact.play(0.5, 1, -1);
         }
         // If we've gone off the screen on the top
         if (y < MIN_Y)
@@ -101,6 +106,7 @@ public:
             // Snap back to screen and reverse direction
             y = MIN_Y;
             y_speed *= -1;
+            bn::sound_items::wall_impact.play(0.5, 1, (x / MAX_X));
         }
         // If we've gone off the screen on the bottom
         if (y > MAX_Y)
@@ -108,6 +114,7 @@ public:
             // Snap back to screen and reverse direction
             y = MAX_Y;
             y_speed *= -1;
+            bn::sound_items::wall_impact.play(0.5, 1, (x / MAX_X));
         }
 
         sprite.set_x(x);
@@ -118,7 +125,7 @@ public:
 // Both functions that calculate averages must be set before the BouncerAlt class
 /**
  * Calculates the average x position of all current Bouncer sprites.
- * 
+ *
  * @param bouncers Reference to a vector of Bouncer objects
  */
 bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
@@ -146,7 +153,7 @@ bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
 
 /**
  * Calculates the average y position of all current Bouncer sprites.
- * 
+ *
  * @param bouncers Reference to a vector of Bouncer objects
  */
 bn::fixed average_y(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
@@ -194,8 +201,8 @@ public:
 
     /**
      *  Updates the position of the BouncerAlt sprite
-     * 
-     * @param bouncers Reference to a vector of Bouncer objects 
+     *
+     * @param bouncers Reference to a vector of Bouncer objects
      */
     void update(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
     {
@@ -278,6 +285,8 @@ void check_collision(bn::vector<Bouncer, MAX_BOUNCERS> &bouncers)
                 bouncers[i].y_speed = bouncers[j].y_speed;
                 bouncers[j].x_speed = tempx;
                 bouncers[j].y_speed = tempy;
+
+                bn::sound_items::bouncer_impact.play(0.5, 1, x_dist / MAX_X);
             }
         }
     }
